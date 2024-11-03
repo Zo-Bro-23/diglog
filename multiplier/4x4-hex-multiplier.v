@@ -1,9 +1,10 @@
-module Multiplier(SW, HEX0, HEX1, HEX2, LEDR);
+module Multiplier(SW, HEX0, HEX1, HEX2, LEDR, LEDG);
 	input [17:0] SW;
 	output [6:0] HEX0;
 	output [6:0] HEX1;
 	output [6:0] HEX2;
 	output [17:0] LEDR;
+	output [7:0] LEDG;
 	wire[7:0] sum0;
 	wire[7:0] carry0;
 	wire[7:0] sum1;
@@ -93,6 +94,34 @@ module Multiplier(SW, HEX0, HEX1, HEX2, LEDR);
 	assign carry2[6]=(carry2[5]^sum0[6])|(carry2[5]&sum1[6])|(sum0[6]&sum1[6]);
 	assign sum2[7]=(sum0[7]^sum1[7])^carry2[6];
 	assign sum2[8]=(carry2[6]^sum0[7])|(carry2[6]&sum1[7])|(sum0[7]&sum1[7]);
+	
+	assign LEDR[0]=sum2[0];
+	assign LEDR[1]=sum2[1];
+	assign LEDR[2]=sum2[2];
+	assign LEDR[3]=sum2[3];
+	assign LEDR[4]=sum2[4];
+	assign LEDR[5]=sum2[5];
+	assign LEDR[6]=sum2[6];
+	assign LEDR[7]=sum2[7];
+	assign LEDR[8]=sum2[8];
+	
+	assign LEDG[0]=sum1[0];
+	assign LEDG[1]=sum1[1];
+	assign LEDG[2]=sum1[2];
+	assign LEDG[3]=sum1[3];
+	assign LEDG[4]=sum1[4];
+	assign LEDG[5]=sum1[5];
+	assign LEDG[6]=sum1[6];
+	assign LEDG[7]=sum1[7];
+	
+	assign LEDR[9]=sum0[0];
+	assign LEDR[10]=sum0[1];
+	assign LEDR[11]=sum0[2];
+	assign LEDR[12]=sum0[3];
+	assign LEDR[13]=sum0[4];
+	assign LEDR[14]=sum0[5];
+	assign LEDR[15]=sum0[6];
+	assign LEDR[16]=sum0[7];
 	
 	assign HEX0[0]=(sum2[0]&~sum2[1]&~sum2[2]&~sum2[3])|(~sum2[0]&~sum2[1]&sum2[2]&~sum2[3])|(sum2[0]&sum2[1]&~sum2[2]&sum2[3])|(sum2[0]&~sum2[1]&sum2[2]&sum2[3]);
 	assign HEX0[1]=(sum2[0]&~sum2[1]&~sum2[2]&~sum2[3])|(sum2[0]&~sum2[1]&sum2[2]&~sum2[3])|(~sum2[0]&sum2[1]&sum2[2]&~sum2[3])|(sum2[0]&sum2[1]&~sum2[2]&sum2[3])|(~sum2[0]&~sum2[1]&sum2[2]&sum2[3])|(~sum2[0]&sum2[1]&sum2[2]&sum2[3])|(sum2[0]&sum2[1]&sum2[2]&sum2[3]);
