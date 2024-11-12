@@ -1,4 +1,4 @@
-module DFF(input d, input clk, output Q, output NQ);
+module DFFl(input d, input clk, output Q, output NQ);
 	wire CLK1;
 	wire CLK2;
 	wire Q1;
