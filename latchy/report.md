@@ -19,3 +19,7 @@ https://github.com/Zo-Bro-23/diglog/blob/24c902dcfe08dcfce74a8253f5f9b859fa8aae0
 ![5276528F-3CF4-4CDC-BBA9-9CBCF61F1592](https://github.com/user-attachments/assets/c09861d7-257c-4d68-baea-b1c6d06092d2)
 https://github.com/Zo-Bro-23/diglog/blob/c69dff2afaf75dd40abf0a316f54811fdaa92b4d/latchy/DFFl.v#L1-L10
 ![image](https://github.com/user-attachments/assets/f3b36d9b-1457-4f09-83e3-13f7eec03cc9)
+
+## Reflection
+Once I constructed the latches and flip-flops using logic gates, it was fairly easy to transfer to Quartus. One point of confusion was on how to represent feeding outputs back into inputs. I quickly realized, however, that I could just reuse outputs as inputs and Quartus would be fine. I had dabbled in this previously when I tried repurposing outputs as wires and feeding them back into inputs. I was wondering what the initial state of the outputs would be since they are not specified, and the waveform shows the crossed out "unknown" pattern, so I am assuming that the actual FPGA will have either a half-lit LED or assume the outputs to be low initially.
+
