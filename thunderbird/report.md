@@ -20,4 +20,91 @@ I assigned the LED outputs by thinking about them in terms of conditional logic.
 
 Thus, I was done with my first prototype.
 
+```verilog
+module light(input clk, input in, output a, b, c);
+	wire sn[1:0];
+	wire s[1:0];
+	DFFl flip0(s[0], clk, sn[0]);
+	DFFl flip1(s[1], clk, sn[1]);
+	assign s[0] = ~sn[0] & (in | sn[1]);
+	assign s[1] = (sn[1] & ~sn[0]) | (~sn[1] & sn[0]);
+	assign a = s[0] & s[1];
+	assign b = s[1];
+	assign c = s[0] | s[1];
+endmodule
+
+module DFFl(input d, input clk, output q);
+	wire CLK1;
+	wire CLK2;
+	wire Q1;
+	wire Q2;
+	assign CLK2 = clk;
+	assign CLK1 = ~clk;
+	DLat D1(d, CLK1, Q1);
+	DLat D2(Q1, CLK2, Q2);
+	assign q = Q2;
+endmodule
+
+module DLat(input d, input e, output q);
+	assign q = ~((~d & e) | nq);
+	assign nq = ~((d & e) | q);
+endmodule
+```
+
 ## Debugging
+Initially, my code did not work on my FPGA, and behaved very weirdly. I tried a waveform simulation, and realized that the entire output was greyed out because I did not have a reset for my flip-flops. I thought I could get away without having a reset, because the last project worked, but I realized that the last project worked because the flip-flops were essentially getting reset when they got an input of 0. Thus I read up the section in the textbook on resettable flip-flops, and learnt that you could either reset it at the input (immediately reset) or inside the flip-flop (resets on the next clock tick). It sounded easier to work at it on the input, so I did a `D & ~reset` instead of `D` for the inputs of my flip-flops. My FPGA still behaved weirdly, and although I do not remember how my waveform worked exactly, I do not think it worked as expected.
+
+I revisited my boolean expressions and realized that one of them was incorrect due to a mistake when reading from the truth table into the K-maps. I fixed that error, and my waveform worked.
+
+```verilog
+module light(input clk, input reset, input in, output a, b, c);
+	wire sn[1:0];
+	wire s[1:0];
+	DFFl flip0((s[0] & ~reset), clk, sn[0]);
+	DFFl flip1((s[1] & ~reset), clk, sn[1]);
+	assign s[0] = ~sn[0] & (in | sn[1]);
+	assign s[1] = (sn[1] & ~sn[0]) | (~sn[1] & sn[0]);
+	assign a = s[0] & s[1];
+	assign b = s[1];
+	assign c = s[0] | s[1];
+endmodule
+```
+
+## Extension
+Since the right and left are the same with the order of the LEDs reversed, I made my light machine into a module and repeated it twice for both sides. I cleaned up my code and connected it to the right FPGA pins, and I was ready to test. My waveform worked as expected, and so I tried it out on the FPGA. It was working well for the most part, but I noticed that the first LED was turning on as soon as the input was turned on, and wouldn't wait for the clock tick. Mr. Bakker suggested doing further testing on the waveform, and I realized that the first LED would also not turn off when the flip-flops were reset. I went back to the code and read through the logic in my mind, and I realized the mistake. The first LED was `s[0] | s[1]`, and that was the only one being turned on, so `s[0]` must be the problem. `s[0]=~sn[0] & (in | sn[1])`, and when the flip-flops were reset `sn[0]=sn[1]=0`, so if `in=1`, then `s[0]=1`. This made sense, but this was not how I expected it to work. I then realized that I was supposed to base the LED outputs on `sn` and not `s`, because the LEDs were typically connected to the outputs of the flip-flops, not the inputs. I changed the LED assignments from `s` to `sn`, and here is the resulting code.
+
+```verilog
+module zbird(input [3:0] KEY, input [17:0] SW, output [17:0] LEDR);
+	wire direction;
+	assign direction = SW[0];
+	
+	light left(
+		.clk(~KEY[2]), 
+		.in(~direction & SW[17]),
+		.reset(~KEY[3]), 
+		.a(LEDR[11]), 
+		.b(LEDR[10]), 
+		.c(LEDR[9])
+		);
+	
+	light right(
+		.clk(~KEY[2]), 
+		.in(direction & SW[17]), 
+		.reset(~KEY[3]), 
+		.a(LEDR[0]), 
+		.b(LEDR[1]), 
+		.c(LEDR[2]));
+endmodule
+
+module light(input clk, input reset, input in, output a, b, c);
+	wire sn[1:0];
+	wire s[1:0];
+	DFFl flip0((s[0] & ~reset), clk, sn[0]);
+	DFFl flip1((s[1] & ~reset), clk, sn[1]);
+	assign s[0] = ~sn[0] & (in | sn[1]);
+	assign s[1] = (sn[1] & ~sn[0]) | (~sn[1] & sn[0]);
+	assign a = sn[0] & sn[1];
+	assign b = sn[1];
+	assign c = sn[0] | sn[1];
+endmodule
+```
