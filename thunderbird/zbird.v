@@ -1,4 +1,4 @@
-module zbird(input [3:0] KEY, input [17:0] SW, input CLOCK_50, output [17:0] LEDR);
+module zbird(input [3:0] KEY, input [17:0] SW, output [17:0] LEDR);
 	wire direction;
 	assign direction = SW[0];
 	
@@ -27,9 +27,9 @@ module light(input clk, input reset, input in, output a, b, c);
 	DFFl flip1((s[1] & ~reset), clk, sn[1]);
 	assign s[0] = ~sn[0] & (in | sn[1]);
 	assign s[1] = (sn[1] & ~sn[0]) | (~sn[1] & sn[0]);
-	assign a = sn[0] & sn[1];
-	assign b = sn[1];
-	assign c = sn[0] | sn[1];
+	assign a = s[0] & s[1];
+	assign b = s[1];
+	assign c = s[0] | s[1];
 endmodule
 
 module DFFl(input d, input clk, output q);
