@@ -27,7 +27,7 @@ module light(input clk, input in, output a, b, c);
 	DFFl flip0(s[0], clk, sn[0]);
 	DFFl flip1(s[1], clk, sn[1]);
 	assign s[0] = ~sn[0] & (in | sn[1]);
-	assign s[1] = (sn[1] & ~sn[0]) | (~sn[1] & sn[0]);
+	assign s[1] = (sn[1] & ~sn[0]) | (~sn[1] & sn[0] & ~in);
 	assign a = s[0] & s[1];
 	assign b = s[1];
 	assign c = s[0] | s[1];
@@ -114,3 +114,5 @@ The code now worked perfectly on the waveform. On the FPGA, however, it was terr
 
 ## Musings
 I have been thinking about the difference between assigning the LEDs based on `s` and `sn`, and I don't think there is any difference except for the observed behavior of the first LED toggling immediately based on the input signal. Everything else should work as expected, since `s` is merely "one cycle" ahead of `sn` with respect to the input. After one clock tick, `sn` becomes `s`, and so having the LEDs based on `s` will mean that they update one tick sooner than `sn`, which explains the observed first LED's seeming disregard for the clock tick. Thus, although I spent a long time trying to figure out why my waveform and FPGA were inconsistent with each other for the modified `sn` design, I was unable to debug it, and so I decided to finalize on the `s` design. It works well for a thunderbird light signal, except for the fact that the first LED seems to irk me with its inconsistency with the rest of the lights :(
+
+https://github.com/Zo-Bro-23/diglog/blob/f2c953f706b7288a78234bbc675e1ca78345b063/thunderbird/zbird.v#L1-L50
