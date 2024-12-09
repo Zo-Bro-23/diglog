@@ -5,8 +5,8 @@ module zbird(input [3:0] KEY, input [17:0] SW, output [17:0] LEDR);
 	// Right and left sides
 	
 	light left(
-		.clk(SW[6]),
-		//.clk2(~KEY[1]),
+		.clk1(~KEY[2]),
+		.clk2(~KEY[1]),
 		.in(~direction & SW[17]),
 		.reset(~KEY[3]), 
 		.a(LEDR[11]), 
@@ -15,8 +15,8 @@ module zbird(input [3:0] KEY, input [17:0] SW, output [17:0] LEDR);
 		);
 	
 	light right(
-		.clk(SW[6]),
-		//.clk2(~KEY[1]),
+		.clk1(~KEY[2]),
+		.clk2(~KEY[1]),
 		.in(direction & SW[17]), 
 		.reset(~KEY[3]), 
 		.a(LEDR[0]), 
@@ -24,13 +24,13 @@ module zbird(input [3:0] KEY, input [17:0] SW, output [17:0] LEDR);
 		.c(LEDR[2]));
 endmodule
 
-module light(input clk, input reset, input in, output a, b, c);
+module light(input clk1, input clk2, input reset, input in, output a, b, c);
 	// A single side
 
 	wire CS[1:0];
 	wire NS[1:0];
-	DFFl flip0((NS[0] & ~reset), clk, CS[0]);
-	DFFl flip1((NS[1] & ~reset), clk, CS[1]);
+	DDFFl flip0((NS[0] & ~reset), clk1, clk2, CS[0]);
+	DDFFl flip1((NS[1] & ~reset), clk1, clk2, CS[1]);
 	assign NS[0] = ~CS[0] & (in | CS[1]);
 	assign NS[1] = (CS[1] & ~CS[0]) | (~CS[1] & CS[0]);
 	assign a = CS[0] & CS[1];
