@@ -70,6 +70,9 @@ module light(input clk, input reset, input in, output a, b, c);
 endmodule
 ```
 
+![image](https://github.com/user-attachments/assets/c16725d1-19fc-44c8-bb0f-e25300cbd25c)
+
+
 ## Extension
 Since the right and left are the same with the order of the LEDs reversed, I made my light machine into a module and repeated it twice for both sides. I cleaned up my code and connected it to the right FPGA pins, and I was ready to test. My waveform worked as expected, and so I tried it out on the FPGA. It was working well for the most part, but I noticed that the first LED was turning on as soon as the input was turned on, and wouldn't wait for the clock tick. Mr. Bakker suggested doing further testing on the waveform, and I realized that the first LED would also not turn off when the flip-flops were reset. I went back to the code and read through the logic in my mind, and I realized the mistake. The first LED was `s[0] | s[1]`, and that was the only one being turned on, so `s[0]` must be the problem. `s[0]=~sn[0] & (in | sn[1])`, and when the flip-flops were reset `sn[0]=sn[1]=0`, so if `in=1`, then `s[0]=1`. This made sense, but this was not how I expected it to work. I then realized that I was supposed to base the LED outputs on `sn` and not `s`, because the LEDs were typically connected to the outputs of the flip-flops, not the inputs. I changed the LED assignments from `s` to `sn`, and here is the resulting code.
 
