@@ -72,6 +72,7 @@ endmodule
 
 ![image](https://github.com/user-attachments/assets/c16725d1-19fc-44c8-bb0f-e25300cbd25c)
 
+[Video](https://drive.google.com/file/d/1Ag_py-D7EoxWpAZVfo8DWmFsyNGwUbq3/view?usp=drive_link)
 
 ## Extension
 Since the right and left are the same with the order of the LEDs reversed, I made my light machine into a module and repeated it twice for both sides. I cleaned up my code and connected it to the right FPGA pins, and I was ready to test. My waveform worked as expected, and so I tried it out on the FPGA. It was working well for the most part, but I noticed that the first LED was turning on as soon as the input was turned on, and wouldn't wait for the clock tick. Mr. Bakker suggested doing further testing on the waveform, and I realized that the first LED would also not turn off when the flip-flops were reset. I went back to the code and read through the logic in my mind, and I realized the mistake. The first LED was `s[0] | s[1]`, and that was the only one being turned on, so `s[0]` must be the problem. `s[0]=~sn[0] & (in | sn[1])`, and when the flip-flops were reset `sn[0]=sn[1]=0`, so if `in=1`, then `s[0]=1`. This made sense, but this was not how I expected it to work. I then realized that I was supposed to base the LED outputs on `sn` and not `s`, because the LEDs were typically connected to the outputs of the flip-flops, not the inputs. I changed the LED assignments from `s` to `sn`, and here is the resulting code.
@@ -117,6 +118,8 @@ endmodule
 ## Debugging 2.0
 The code now worked perfectly on the waveform. On the FPGA, however, it was terribly consistently inconsistent. What I mean is, it followed a pattern of `111`, `000`, `111`, `000`, `111`, `011`, `001`, `000`, `111`, etc, or something similar. It followed a similar pattern each time, but there were variations in the number of iterations, and it behaved nothing like the waveform. After talking to Kevin, I realized that he was facing a similar problem. He seemed to think that it was an issue with the internal wiring and timing of the FPGA. I spent a significant amount of time with Edie, and she had similar results with her code. Nikol had virtually the same code as me, except for her flip-flops, which she reset at the SR-level, and hers works, although I struggle to see how the resetting of the flip-flop could affect it. I also find it difficult to work with since the waveform works as expected.
 
+[Video](https://drive.google.com/file/d/1K6iHvUMId_EkFjfc0gZ__hud8cFqbwsC/view?usp=drive_link)
+
 ## Musings
 I have been thinking about the difference between assigning the LEDs based on `s` and `sn`, and I don't think there is any difference except for the observed behavior of the first LED toggling immediately based on the input signal. Everything else should work as expected, since `s` is merely "one cycle" ahead of `sn` with respect to the input. After one clock tick, `sn` becomes `s`, and so having the LEDs based on `s` will mean that they update one tick sooner than `sn`, which explains the observed first LED's seeming disregard for the clock tick. Thus, although I spent a long time trying to figure out why my waveform and FPGA were inconsistent with each other for the modified `sn` design, I was unable to debug it, and so I decided to finalize on the `s` design. It works well for a thunderbird light signal, except for the fact that the first LED seems to irk me with its inconsistency with the rest of the lights :(
 
@@ -128,3 +131,5 @@ After my conversation with Mr. Bakker, I tried rewriting the code with a double 
 https://github.com/Zo-Bro-23/diglog/blob/fda3fd09c96a3a761be4820922697fb9630bcfa5/thunderbird/zbird.v#L1-L64
 
 As surprising as it was, my code worked! This means that switch bouncing was the problem, but I still didn't understand why the switches didn't bounce when the LEDs were connected to the Next State instead of the Current State. My guess is that it has something to do with the way the LEDs are positioned in the circuit and the timing of the components in the FPGA. 
+
+[Video](https://drive.google.com/file/d/16zfFXPwM0HfBT82VAHqFDWpW2nVPaQLY/view?usp=drive_link)
