@@ -112,6 +112,8 @@ module light(input clk, input reset, input in, output a, b, c);
 endmodule
 ```
 
+![image](https://github.com/user-attachments/assets/c065d2df-bc1c-45b6-8828-8502afa10293)
+
 ## Debugging 2.0
 The code now worked perfectly on the waveform. On the FPGA, however, it was terribly consistently inconsistent. What I mean is, it followed a pattern of `111`, `000`, `111`, `000`, `111`, `011`, `001`, `000`, `111`, etc, or something similar. It followed a similar pattern each time, but there were variations in the number of iterations, and it behaved nothing like the waveform. After talking to Kevin, I realized that he was facing a similar problem. He seemed to think that it was an issue with the internal wiring and timing of the FPGA. I spent a significant amount of time with Edie, and she had similar results with her code. Nikol had virtually the same code as me, except for her flip-flops, which she reset at the SR-level, and hers works, although I struggle to see how the resetting of the flip-flop could affect it. I also find it difficult to work with since the waveform works as expected.
 
