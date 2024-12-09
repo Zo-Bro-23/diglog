@@ -116,3 +116,10 @@ The code now worked perfectly on the waveform. On the FPGA, however, it was terr
 I have been thinking about the difference between assigning the LEDs based on `s` and `sn`, and I don't think there is any difference except for the observed behavior of the first LED toggling immediately based on the input signal. Everything else should work as expected, since `s` is merely "one cycle" ahead of `sn` with respect to the input. After one clock tick, `sn` becomes `s`, and so having the LEDs based on `s` will mean that they update one tick sooner than `sn`, which explains the observed first LED's seeming disregard for the clock tick. Thus, although I spent a long time trying to figure out why my waveform and FPGA were inconsistent with each other for the modified `sn` design, I was unable to debug it, and so I decided to finalize on the `s` design. It works well for a thunderbird light signal, except for the fact that the first LED seems to irk me with its inconsistency with the rest of the lights :(
 
 https://github.com/Zo-Bro-23/diglog/blob/f2c953f706b7288a78234bbc675e1ca78345b063/thunderbird/zbird.v#L1-L50
+
+## Debugging 3.0
+After my conversation with Mr. Bakker, I tried rewriting the code with a double flip-flop that uses two clock signals to prevent switch bouncing. (I also renamed variables and added comments)
+
+https://github.com/Zo-Bro-23/diglog/blob/fda3fd09c96a3a761be4820922697fb9630bcfa5/thunderbird/zbird.v#L1-L64
+
+As surprising as it was, my code worked! This means that switch bouncing was the problem, but I still didn't understand why the switches didn't bounce when the LEDs were connected to the Next State instead of the Current State. My guess is that it has something to do with the way the LEDs are positioned in the circuit and the timing of the components in the FPGA. 
