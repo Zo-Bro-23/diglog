@@ -130,6 +130,8 @@ After my conversation with Mr. Bakker, I tried rewriting the code with a double 
 
 https://github.com/Zo-Bro-23/diglog/blob/fda3fd09c96a3a761be4820922697fb9630bcfa5/thunderbird/zbird.v#L1-L64
 
-As surprising as it was, my code worked! This means that switch bouncing was the problem, but I still didn't understand why the switches didn't bounce when the LEDs were connected to the Next State instead of the Current State. My guess is that it has something to do with the way the LEDs are positioned in the circuit and the timing of the components in the FPGA. 
+As surprising as it was, my code worked! This means that switch bouncing was the problem, but I still didn't understand why the switches didn't bounce when the LEDs were connected to the Next State instead of the Current State. My guess is that it has something to do with the way the LEDs are positioned in the circuit and the timing of the components in the FPGA.
+
+![image](https://github.com/user-attachments/assets/cc1dd6ca-200f-42ff-9c12-36445c345942)
 
 [Video](https://drive.google.com/file/d/16zfFXPwM0HfBT82VAHqFDWpW2nVPaQLY/view?usp=drive_link)
