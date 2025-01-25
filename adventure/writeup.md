@@ -151,3 +151,7 @@ module room(input [2:0] direction, input sword, input clk, input reset, output r
 	end
 endmodule
 ```
+I ran it on the FPGA, with the switches as directional input, the buttons (KEY) as clock and reset inputs, and the LEDs as output for the outcome of the game. It did not work.
+
+## Debugging
+The first thing I realized was that I needed a better output system in order to debug it properly on the FPGA. 
