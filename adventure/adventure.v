@@ -193,6 +193,5 @@ module room(input [2:0] direction, input sword, input clk, input reset, output r
 	always @ (posedge clk) begin
 		if (reset) state <= CC;
 		else state <= nextstate;
-		//state <= nextstate;
 	end
 endmodule
