@@ -180,3 +180,23 @@ This did not work as expected, and the room would change when a button was press
 The HEX display outputs were just tedious to do, and my decimal code simplified it by a huge amount. I ended up using binary outputs only for the direction HEX since not all directions were valid characters. Finally, I was at a place where I was happy with my code.
 
 https://github.com/Zo-Bro-23/diglog/blob/8ec5a7721090f979a8a3f98506dad71af933b3d4/adventure/adventure.v#L1-L197
+
+## Waveform
+![image](https://github.com/Zo-Bro-23/diglog/blob/main/adventure/waveform.png)
+
+The waveform is pretty intuitive to understand. The first four lines signify the four direction inputs `(East, South, North, West)`, and the LEDs signify the outcome `(Running, Die, Live, Sword)`. The state outputs are encoded in binary, with the rooms `(CC, TT, RR, SSS, DD, GG, and VV)` corresponding to `(0, 1, 2, 3, 4, 5, and 6)`.
+
+The test resets the game by pressing all the buttons, and then goes East. The state changes from 0 to 1. Going South changes it from 1 to 2. Going East changes it first to 4 (DD) then to 5 (GG), and the outcome becomes Die. Next, the game is reset. Inputs go `East > South > West > East > East`, and the rooms go `0, 1, 2, 3, 4, 6` which corresponds to `CC, TT, RR, SSS, DD, VV`. The outcomes go `Run > Sword > Run > Live`.
+
+## RTL
+![image](https://github.com/Zo-Bro-23/diglog/blob/main/adventure/artl1.png)
+
+This looks almost identical to my block diagram. I was initially confused by the 15-bit "DATA" used in the Decoder and Muxes. I then realized that there were 16 possibilities for the various button combinations, which is likely what this is. For example, East would be `1110`, (since the buttons are inverted), which would correspond to `14` or `E` in HEX. However, this is only four bits, and not sixteen, so I am still slightly confused (direction is a 3 bit output, which might have something to do with this). Also, I don't fully understand why the decoder is used for resetting, while muxes are used for the direction input when the behavioral code is essentially the same for both those functions. Either way, three D-latches pass on these outputs as inputs to the room FSM, and connections between the room and sword FSMs are as expected. The room FSM outputs into decoders which are off-screen. I took a look, and it's just a very long list of decoders with complicated combinational logic that represents the HEX display outputs.
+
+![image](https://github.com/Zo-Bro-23/diglog/blob/main/adventure/artl2.png)
+
+This RTL diagram looks exactly like the diagram used in the previous project for an automatic counter. The "Add" element works on a 23 bus until they are all one (adding one each clock pulse), which then goes through an AND gate as an enable for a D flip-flop that "flips" the pulse.
+
+![image](https://github.com/Zo-Bro-23/diglog/blob/main/adventure/artl3.png)
+
+The sword FSM diagram is quite simple, and makes sense at the large
