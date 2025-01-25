@@ -199,4 +199,11 @@ This RTL diagram looks exactly like the diagram used in the previous project for
 
 ![image](https://github.com/Zo-Bro-23/diglog/blob/main/adventure/artl3.png)
 
-The sword FSM diagram is quite simple, and makes sense at the large
+The sword FSM diagram is quite simple, and makes sense at the large scale. It is performing some evaluation on the input from the room FSM (Equal0) and using a Decoder to set the next state to the appropriate value. This is then getting passed on to the current state using a flip flop.
+
+![image](https://github.com/Zo-Bro-23/diglog/blob/main/adventure/artl4.png)
+
+The room FSM is the most complicated part of the circuit. Simplifying it and looking at it from the top down, however, the basic structure of an FSM is apparent. The decoders and the equals are performing the combinational logic evaluation in order to the determine the next state using the current state and inputs. The muxes along with the flip flop is then setting the current state to the next state. Finally, the second set of muxes as well as the decoders which are off-screen are used to determine the complicated outputs being sent to the HEX dispalys. I still don't fully understand the DATA buses (and why they are 16 bit) and also why muxes are being used to "select" the next state instead of decoders or combinational logic being used, so perhaps we can discuss this during the next class.
+
+## Reflection
+
