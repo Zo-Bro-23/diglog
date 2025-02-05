@@ -1,58 +1,47 @@
-module memory(input [2:0] D, input [1:0] SEL, input E, output [2:0] Q);
+module memory(input [2:0] D,  input [1:0] SEL, input E, output [2:0] Q);
 	wire [3:0] wSEL;
 	wire [3:0] rSEL;
-	wire [2:0] tQ [3:0];
-	decoder(SEL, E, wSEL[0], wSEL[1], wSEL[2], wSEL[3], rSEL[0], rSEL[1], rSEL[2], rSEL[3]);
+	wire [3:0] [2:0] rPATCH;
+	wire [3:0] [2:0] tQ;
+	// 12 bit bus also possible
+	decoder(SEL, E, rSEL, wSEL);
 	word WRDINST [3:0] (D, wSEL, tQ);
-	//assign Q = (tQ[0] & {4{rSEL[0]}}) | (tQ[1] & {4{rSEL[1]}}) | (tQ[2] & {4{rSEL[2]}}) | (tQ[3] & {4{rSEL[3]}});
-	assign Q = |(tQ & {3{rSEL}});
+	// CHAT GPT AND UNDERSTANDING PATCHING
+	patch PATINST [3:0] (rSEL, tQ, rPATCH);
+	// had to switch to SV for this
+	//push PUSHINST [3:0] (rPATCH, Q);
+	//assign Q = |rPATCH;
+	// FIX THIS PLEASE
+	// reduction operators wont work
+	assign Q = rPATCH[0] | rPATCH[1] | rPATCH[2] | rPATCH[3];
 endmodule
 
-module decoder(input [1:0] SEL, input E, output reg A, B, C, D, output reg rA, rB, rC, rD);
+//module push(input [2:0] current, output reg [2:0] next);
+	//always @ (current) begin
+		//if (|current) next = current;
+		//else current = current;
+	//end
+//endmodule
+// tried simulating FOR loop
+
+module patch(input value, input [2:0] wSTATE, output [2:0] out);
+	//basically a for loop
+	wire [2:0] rPICK;
+	assign rPICK = {3{value}};
+	assign out = wSTATE & rPICK;
+endmodule
+
+module decoder(input [1:0] SEL, input E, output reg [3:0] rSEL, output [3:0] wSEL);	
 	always @ (SEL or E) begin
 		case (SEL)
-			0: begin
-				A <= E;
-				B <= 0;
-				C <= 0;
-				D <= 0;
-				rA <= 1;
-				rB <= 0;
-				rC <= 0;
-				rD <= 0;
-			end
-			1: begin
-				A <= 0;
-				B <= E;
-				C <= 0;
-				D <= 0;
-				rA <= 0;
-				rB <= 1;
-				rC <= 0;
-				rD <= 0;
-			end
-			2: begin
-				A <= 0;
-				B <= 0;
-				C <= E;
-				D <= 0;
-				rA <= 0;
-				rB <= 0;
-				rC <= 1;
-				rD <= 0;
-			end
-			3: begin
-				A <= 0;
-				B <= 0;
-				C <= 0;
-				D <= E;
-				rA <= 0;
-				rB <= 0;
-				rC <= 0;
-				rD <= 1;
-			end
+			0: rSEL <= 4'b0001;
+			1: rSEL <= 4'b0010;
+			2: rSEL <= 4'b0100;
+			3: rSEL <= 4'b1000;
+			// DONT DO 32 LINE CODE
 		endcase
 	end
+	assign wSEL = rSEL & {4{E}};
 endmodule
 
 module word(input [2:0] D, input E, output [2:0] Q);
