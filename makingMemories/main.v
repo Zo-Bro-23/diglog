@@ -1,19 +1,13 @@
-module memory(input [2:0] D,  input [1:0] SEL, input E, output [2:0] Q);
-	wire [3:0] wSEL;
-	wire [3:0] rSEL;
-	wire [3:0] [2:0] rPATCH;
-	wire [3:0] [2:0] tQ;
-	// 12 bit bus also possible
-	decoder(SEL, E, rSEL, wSEL);
-	word WRDINST [3:0] (D, wSEL, tQ);
-	// CHAT GPT AND UNDERSTANDING PATCHING
-	patch PATINST [3:0] (rSEL, tQ, rPATCH);
-	// had to switch to SV for this
-	//push PUSHINST [3:0] (rPATCH, Q);
-	//assign Q = |rPATCH;
-	// FIX THIS PLEASE
-	// reduction operators wont work
-	assign Q = rPATCH[0] | rPATCH[1] | rPATCH[2] | rPATCH[3];
+module memory(input [2:0] D, input [1:0] SEL, input E, output [2:0] Q);
+	wire [3:0] wSEL; // Write select
+	wire [3:0] rSEL; // Read select
+	wire [3:0] [2:0] rPATCH; // Nested array for comparing values
+	wire [3:0] [2:0] tQ; // Temporary output as nested array for computation
+	// It is possible to use a 12 bit bus and uncomplicate things, but that wouldn't be fun
+	decoder(SEL, E, rSEL, wSEL); // Runs the decoder to convert 2 bit select to 4 bit one-hot select buses
+	word WRDINST [3:0] (D, wSEL, tQ); // Creates multiple words and pushes the output to tQ (nested array)
+	patch PATINST [3:0] (rSEL, tQ, rPATCH); // Uses the patch module to loop through the nested array and compare the elemental arrays
+	assign Q = rPATCH[0] | rPATCH[1] | rPATCH[2] | rPATCH[3]; // Have to manually compare nested array since for loop and generate statements are strictly prohibited
 endmodule
 
 //module push(input [2:0] current, output reg [2:0] next);
