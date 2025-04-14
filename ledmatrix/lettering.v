@@ -10,7 +10,7 @@ module letterbody(input CLOCK, output reg [2:0] RGB1, output reg [2:0] RGB2, out
 	reg clk;
 	
 	reg [24:0] clkcounter = 0;
-	reg [24:0] rowcounter = 8025; // Starting high to allow it time to setup before starting the first line
+	reg [24:0] rowcounter = 8025;
 	reg [24:0] addrcounter = 0;
 	reg [24:0] animcounter = 0;
 	reg [24:0] lettercounter = 0;
@@ -20,10 +20,7 @@ module letterbody(input CLOCK, output reg [2:0] RGB1, output reg [2:0] RGB2, out
 	reg [111:0] store3 = 112'b0011001001100110111110011001011011000111110100111001110110010001011110010110111111010001001110010001110111110000;
 	reg [111:0] store4 = 112'b0011111101101001100101101111011000111001111000110110100110011111100101111111100111110001111101111111011110010000;
 	
-	reg [63:0] row1 = 0;
-	reg [63:0] row2 = 0;
-	reg [63:0] row3 = 0;
-	reg [63:0] row4 = 0;
+	reg [255:0] row = 0;
 	
 	reg [215:0] message = 216'h00001B04050B0F0F03000D010009001B040C120F17000F0C0C0508;
 	
@@ -37,46 +34,37 @@ module letterbody(input CLOCK, output reg [2:0] RGB1, output reg [2:0] RGB2, out
 		end
 	end
 	
-	always @ (posedge clk) begin // Don't know why posedge works and negedge doesn't
+	always @ (posedge clk) begin
 		if (rowcounter <= 63) begin
-			if (addrcounter == 2) begin
-				RGB1 <= {3{row1[rowcounter]}};
-			end
-			else if (addrcounter == 3) begin
-				RGB1 <= {3{row2[rowcounter]}};
-			end
-			else if (addrcounter == 4) begin
-				RGB1 <= {3{row3[rowcounter]}};
-			end
-			else if (addrcounter == 5) begin
-				RGB1 <= {3{row4[rowcounter]}};
+			if (addrcounter <= 5 && addrcounter >= 2) begin
+				RGB1 <= {3{row[(addrcounter - 2) * 64 + rowcounter]}};
 			end
 			else begin
 				RGB1 <= 3'b000;
 			end
 			RGB2 <= 3'b000;
 		end
-		if (rowcounter == 500) OE <= 0; // Don't know why active high works and not active low
+		if (rowcounter == 500) OE <= 0;
 		if (rowcounter == 550) LAT <= 1;
 		if (rowcounter == 600) LAT <= 0;
 		if (rowcounter == 650) OE <= 1;
 		rowcounter <= rowcounter + 1;
 		if (rowcounter == 8000) begin
-			addr <= addr + 1; // Confusing because of non blocking assignment
-			addrcounter[3:0] <= addr + 2; // WHY? WHY??? Why does Matrix update address befofre
+			addr <= addr + 1;
+			addrcounter[3:0] <= addr + 2;
 		end
-		if (rowcounter == 8050) rowcounter <= 0; // Generally good to allow space?
+		if (rowcounter == 8050) rowcounter <= 0;
 		
 		animcounter <= animcounter + 1;
-		if (animcounter == 8000000) begin
-			row1[55:0] <= row1[63:8];
-			row1[63:56] <= {2'b00, store1[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
-			row2[55:0] <= row2[63:8];
-			row2[63:56] <= {2'b00, store2[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
-			row3[55:0] <= row3[63:8];
-			row3[63:56] <= {2'b00, store3[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
-			row4[55:0] <= row4[63:8];
-			row4[63:56] <= {2'b00, store4[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
+		if (animcounter == 8000000) begin // Any way to optimize this using bit-shift operators?
+			row[55:0] <= row[63:8];
+			row[63:56] <= {2'b00, store1[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
+			row[119:64] <= row[127:72];
+			row[127:120] <= {2'b00, store2[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
+			row[183:128] <= row[191:136];
+			row[191:184] <= {2'b00, store3[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
+			row[247:192] <= row[255:200];
+			row[255:248] <= {2'b00, store4[(message[(lettercounter * 8) +: 8] * 4) +: 4], 2'b00};
 			lettercounter <= lettercounter + 1;
 			animcounter <= 0;
 			if (lettercounter == 26) lettercounter <= 0;
